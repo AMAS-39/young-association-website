@@ -50,20 +50,26 @@
         
         <div>
           <label for="cv" class="block text-gray-600 font-semibold">{{ $t('membership.cvLabel') }}</label>
-          <input
-            type="file"
-            id="cv"
-            @change="handleFileUpload"
-            required
-            class="w-full mt-2 p-2 border rounded-lg focus:ring-2 focus:ring-green-500 transition duration-300"
-          />
+          <div class="custom-file-input flex items-center">
+            <input
+              type="file"
+              id="cv"
+              @change="handleFileUpload"
+              required
+              class="hidden"
+            />
+            <label for="cv" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-l-lg cursor-pointer transition duration-300">
+              Choose file
+            </label>
+            <span class="flex-1 px-3 py-2 border rounded-r-lg bg-white text-gray-600">{{ fileName || 'No file chosen' }}</span>
+          </div>
         </div>
 
         <!-- Submit Button with Loading Indicator -->
         <button
           type="submit"
           :disabled="loading"
-          class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition duration-300 flex justify-center items-center"
+          class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition duration-300 flex justify-center items-center"
         >
           <span v-if="loading" class="loader mr-2"></span>
           <span>{{ loading ? $t('membership.submitting') : $t('membership.apply') }}</span>
@@ -93,6 +99,7 @@ export default {
         email: '',
         cvFile: null,
       },
+      fileName: '',
       submitted: false,
       loading: false,
       errorMessage: '',
@@ -101,6 +108,7 @@ export default {
   methods: {
     handleFileUpload(event) {
       this.formData.cvFile = event.target.files[0];
+      this.fileName = this.formData.cvFile ? this.formData.cvFile.name : '';
     },
     async submitForm() {
       if (!this.formData.cvFile) {
@@ -152,6 +160,10 @@ export default {
 .success-message, .error-message {
   opacity: 1;
   z-index: 10;
+}
+.custom-file-input {
+  display: flex;
+  align-items: center;
 }
 .loader {
   border: 3px solid #f3f3f3;

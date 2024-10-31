@@ -2,13 +2,14 @@
   <header class="bg-kurdishGreen dark:bg-koreanBlue text-white p-4 shadow-md">
     <div class="container mx-auto flex items-center justify-between">
       <!-- Logo / Brand Name -->
-      <router-link to="/" class="flex items-center space-x-2 text-xl font-bold text-white">
-        <img :src="logoSrc" alt="Logo" class="w-20 h-20" />
-        <span>{{ $t("header.title") }}</span>
+      <router-link to="/" class="flex items-center space-x-2 text-lg md:text-xl font-bold text-white">
+        <img :src="logoSrc" alt="Logo" class="w-10 h-10 sm:w-20 sm:h-20" />
+        <span class="hidden sm:inline">{{ $t("header.title") }}</span>
+        <span class="inline sm:hidden">KKYA</span>
       </router-link>
 
       <!-- Desktop Navigation Links -->
-      <nav class="hidden md:flex text-lg space-x-4 ml-auto">
+      <nav class="hidden md:flex text-base md:text-lg space-x-4 ml-auto">
         <router-link to="/" class="hover:text-gray-300">{{ $t("header.home") }}</router-link>
         <router-link to="/about" class="hover:text-gray-300">{{ $t("header.about") }}</router-link>
         <router-link to="/events" class="hover:text-gray-300">{{ $t("header.events") }}</router-link>
@@ -45,16 +46,18 @@
       </div>
     </div>
 
-    <!-- Mobile Menu -->
-    <nav v-if="menuOpen" class="md:hidden mt-4 space-y-4 text-center bg-black-700 p-4 rounded">
-      <router-link to="/" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.home") }}</router-link>
-      <router-link to="/about" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.about") }}</router-link>
-      <router-link to="/events" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.events") }}</router-link>
-      <router-link to="/news" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.news") }}</router-link>
-      <router-link to="/membership" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.membership") }}</router-link>
-      <router-link to="/gallery" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.gallery") }}</router-link>
-      <router-link to="/contact" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.contact") }}</router-link>
-    </nav>
+    <!-- Mobile Menu with Slide Animation -->
+    <transition name="slide">
+      <nav v-if="menuOpen" class="md:hidden mt-4 space-y-4 text-center bg-gray-800 p-4 rounded shadow-lg">
+        <router-link to="/" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.home") }}</router-link>
+        <router-link to="/about" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.about") }}</router-link>
+        <router-link to="/events" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.events") }}</router-link>
+        <router-link to="/news" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.news") }}</router-link>
+        <router-link to="/membership" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.membership") }}</router-link>
+        <router-link to="/gallery" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.gallery") }}</router-link>
+        <router-link to="/contact" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.contact") }}</router-link>
+      </nav>
+    </transition>
   </header>
 </template>
 
@@ -106,16 +109,38 @@ export default {
 </script>
 
 <style scoped>
+/* Fade Transition for Language Menu */
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s ease;
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
 }
+
+/* Slide Transition for Mobile Menu */
+.slide-enter-active, .slide-leave-active {
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+.slide-enter {
+  transform: translateY(-50%);
+  opacity: 0;
+}
+.slide-leave-to {
+  transform: translateY(-50%);
+  opacity: 0;
+}
+
 .bg-kurdishGreen {
   background-color: #009b77;
 }
 .bg-koreanBlue {
   background-color: #0c4da2;
+}
+
+/* Responsive Styles */
+@media (max-width: 928px) {
+  .text-lg {
+    font-size: 1rem; /* Adjust font size for 928px width */
+  }
 }
 </style>
