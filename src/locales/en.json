@@ -1,0 +1,100 @@
+{
+    "welcomeMessage": "Welcome to the Young Association for Economic Growth in Kurdistan",
+    "apply": "Apply",
+    "about": "About Us",
+    "membership": "Membership",
+    "news": "Latest News",
+    "contact": "Contact Us",
+    "footerMessage": "Young Association for Economic Growth in Kurdistan. All rights reserved.",
+    
+    "about": {
+      "missionTitle": "Our Mission & Vision",
+      "missionDescription": "The mission of KKYA is to establish a dynamic bridge between Korea and the Kurdistan Region, fostering mutual understanding, collaboration, and growth through cultural, educational, technological, and professional exchanges.",
+      "historyTitle": "Our History",
+      "historyDescription": "The Korea Kurdistan Youth Association (KKYA) was initiated by his excellency Consul General of the Republic of Korea in Erbil, who started its establishment on September 18, 2024. The KKYA’s mission is to foster a lasting and vibrant connection between Korea and the Kurdistan Region of Iraq, promoting mutual understanding, collaboration, and development.",
+      "structureTitle": "Our Structure",
+      "structurePoint1": "Executive Committee: Leads KKYA with roles like Chairman, Coordinator, Financier, and Secretary, setting policies and strategic goals.",
+      "structurePoint2": "Departments: Specialized units (e.g., Cultural, Education, Technology, etc.) manage events, training, media, and member engagement.",
+      "structurePoint3": "Advisory Board: Optional, providing expert guidance from Korean and Kurdish professionals across various sectors."
+    },
+  
+    "header": {
+     "title": "Korea Kurdistan Youth Association (KKYA)",
+      "home": "Home",
+      "about": "About Us",
+      "events": "Events",
+      "news": "News",
+      "membership": "Membership",
+      "gallery": "Gallery",
+      "contact": "Contact"
+    },
+    "footer": {
+        "copyright": "© 2024 Korea Kurdistan Youth Association (KKYA)",
+        "developer": "Developed by AMAS"
+      }
+    ,
+    "contactPage": {
+    "title": "Contact Us",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your Full Name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Your Email Address",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Your Message",
+    "submitButton": "Send",
+    "successMessage": "Your message has been sent!"
+  }, "eventsPage": {
+    "upcomingTitle": "Upcoming Events",
+    "upcomingDescription": "Join our events and workshops to foster cultural exchange, innovation, and collaborative growth between Korea and Kurdistan.",
+    "pastTitle": "Past Events"
+  },
+  "galleryPage": {
+    "title": "Gallery",
+    "imageAlt": "Gallery Image"
+  },
+  "home": {
+    "heroTitle": "Welcome to Korea Kurdistan Youth Association (KKYA)",
+    "heroSubtitle": "Building a bridge of mutual understanding and collaboration between Korea and the Kurdistan Region through cultural, educational, and professional exchanges.",
+    "joinUs": "Join Us",
+    "learnMore": "Learn More",
+    "aboutTitle": "About the Association",
+    "aboutSubtitle": "Our mission is to foster lasting collaboration between Korea and Kurdistan, empowering youth through cultural exchange, skill development, and innovative projects that drive mutual growth and prosperity.",
+    "mission": "Mission",
+    "missionDesc": "Empowering youth through cultural exchange, skill development, and collaborative projects.",
+    "vision": "Vision",
+    "visionDesc": "Creating a dynamic and lasting bridge between Korea and Kurdistan.",
+    "partnerships": "Partnerships",
+    "partnershipsDesc": "Fostering strategic alliances for mutual growth and innovation.",
+    "keyInitiativesTitle": "Key Initiatives",
+    "initiative1": "Economic Conference",
+    "initiative1Desc": "A major conference...",
+    "initiative2": "Community Development",
+    "initiative2Desc": "Projects to support...",
+    "testimonialsTitle": "What Our Members Say",
+    "testimonial1Quote": "This association changed my life!",
+    "testimonial1Name": "Ahmed",
+    "testimonial2Quote": "An amazing opportunity to learn and grow.",
+    "testimonial2Name": "Fatma",
+    "partnersTitle": "Our Partners"
+  },
+  "membership": {
+    "title": "Become a Member",
+    "description":"Join our mission to bridge Korea and Kurdistan through cultural, educational, and professional exchanges. Apply below to become a member and contribute to mutual growth and understanding.",
+    "formTitle": "Application Form",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your Full Name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Your Email Address",
+    "cvLabel": "Upload CV",
+    "apply": "Apply",
+    "submitting": "Submitting...",
+    "successMessage": "Application submitted successfully!",
+    "submitErrorMessage": "There was an error submitting your application. Please try again later.",
+    "cvErrorMessage": "Please upload your CV."
+  }, "news": {
+    "title": "Latest News",
+    "readMore": "Read More",
+    "viewingArticle": "Viewing article:"
+  }
+  }
+  

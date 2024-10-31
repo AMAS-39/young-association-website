@@ -1,0 +1,121 @@
+<template>
+  <header class="bg-kurdishGreen dark:bg-koreanBlue text-white p-4 shadow-md">
+    <div class="container mx-auto flex items-center justify-between">
+      <!-- Logo / Brand Name -->
+      <router-link to="/" class="flex items-center space-x-2 text-xl font-bold text-white">
+        <img :src="logoSrc" alt="Logo" class="w-20 h-20" />
+        <span>{{ $t("header.title") }}</span>
+      </router-link>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden md:flex text-lg space-x-4 ml-auto">
+        <router-link to="/" class="hover:text-gray-300">{{ $t("header.home") }}</router-link>
+        <router-link to="/about" class="hover:text-gray-300">{{ $t("header.about") }}</router-link>
+        <router-link to="/events" class="hover:text-gray-300">{{ $t("header.events") }}</router-link>
+        <router-link to="/news" class="hover:text-gray-300">{{ $t("header.news") }}</router-link>
+        <router-link to="/membership" class="hover:text-gray-300">{{ $t("header.membership") }}</router-link>
+        <router-link to="/gallery" class="hover:text-gray-300">{{ $t("header.gallery") }}</router-link>
+        <router-link to="/contact" class="hover:text-gray-300">{{ $t("header.contact") }}</router-link>
+      </nav>
+
+      <!-- Language Dropdown and Burger Menu (Mobile) -->
+      <div class="flex items-center ml-4 space-x-4 relative">
+        <!-- Language Dropdown with Custom Styling -->
+        <div class="relative">
+          <button @click="toggleLanguageMenu" class="bg-white text-gray-800 dark:bg-gray-200 dark:text-gray-900 font-semibold px-4 py-2 rounded-lg shadow transition hover:bg-gray-100 dark:hover:bg-gray-300">
+            {{ languageLabel }}
+          </button>
+          <transition name="fade">
+            <div v-if="languageMenuOpen" class="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg shadow-lg z-20">
+              <button @click="changeLanguage('en')" class="block px-4 py-2 text-left w-full hover:bg-gray-100 dark:hover:bg-gray-600">
+                English
+              </button>
+              <button @click="changeLanguage('ku')" class="block px-4 py-2 text-left w-full hover:bg-gray-100 dark:hover:bg-gray-600">
+                کوردی
+              </button>
+            </div>
+          </transition>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button @click="toggleMenu" class="md:hidden text-2xl focus:outline-none">
+          <span v-if="menuOpen">✖</span>
+          <span v-else>☰</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <nav v-if="menuOpen" class="md:hidden mt-4 space-y-4 text-center bg-black-700 p-4 rounded">
+      <router-link to="/" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.home") }}</router-link>
+      <router-link to="/about" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.about") }}</router-link>
+      <router-link to="/events" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.events") }}</router-link>
+      <router-link to="/news" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.news") }}</router-link>
+      <router-link to="/membership" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.membership") }}</router-link>
+      <router-link to="/gallery" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.gallery") }}</router-link>
+      <router-link to="/contact" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.contact") }}</router-link>
+    </nav>
+  </header>
+</template>
+
+<script>
+export default {
+  name: 'MainHeader',
+  data() {
+    return {
+      menuOpen: false,
+      languageMenuOpen: false,
+    };
+  },
+  computed: {
+    logoSrc() {
+      return require('@/assets/logo.png');
+    },
+    languageLabel() {
+      return this.$i18n.locale === 'en' ? 'Language' : 'زمانەکان';
+    },
+  },
+  methods: {
+    toggleMenu() {
+      this.menuOpen = !this.menuOpen;
+    },
+    closeMenu() {
+      this.menuOpen = false;
+    },
+    toggleLanguageMenu() {
+      this.languageMenuOpen = !this.languageMenuOpen;
+    },
+    changeLanguage(lang) {
+      this.$i18n.locale = lang;
+      localStorage.setItem('language', lang);
+      this.languageMenuOpen = false;
+    },
+    closeDropdownOnOutsideClick(event) {
+      if (!this.$el.contains(event.target)) {
+        this.languageMenuOpen = false;
+      }
+    }
+  },
+  mounted() {
+    document.addEventListener('click', this.closeDropdownOnOutsideClick);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.closeDropdownOnOutsideClick);
+  }
+};
+</script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+.bg-kurdishGreen {
+  background-color: #009b77;
+}
+.bg-koreanBlue {
+  background-color: #0c4da2;
+}
+</style>
