@@ -47,15 +47,16 @@
       };
     },
     methods: {
-      login() {
-        if (this.username === 'admin123@' && this.password === 'admin123@') {
-          localStorage.setItem('isAuthenticated', 'true');
-          this.$router.push('/admin');
-        } else {
-          alert('Invalid credentials');
-        }
-      },
-    },
+  login() {
+    if (this.username === 'admin123@' && this.password === 'admin123@') {
+      localStorage.setItem('isAuthenticated', 'true');
+      const redirectPath = this.$route.query.redirect || '/admin';
+      this.$router.push(redirectPath);
+    } else {
+      alert('Invalid credentials');
+    }
+  },
+},
   };
   </script>
   

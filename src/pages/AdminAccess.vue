@@ -9,6 +9,8 @@
         <button @click="currentSection = 'news'" class="block w-full text-left px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Manage News</button>
         <button @click="currentSection = 'gallery'" class="block w-full text-left px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Manage Gallery</button>
         <button @click="currentSection = 'events'" class="block w-full text-left px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Manage Events</button>
+        <!-- Logout Button -->
+        <button @click="logout" class="block w-full text-left px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">Logout</button>
       </nav>
     </aside>
 
@@ -264,6 +266,10 @@ export default {
     closeForm(type) {
       this[`show${type.charAt(0).toUpperCase() + type.slice(1)}Form`] = false;
     },
+    logout() {
+      localStorage.removeItem('isAuthenticated');
+      this.$router.push('/login');
+    }
   },
 };
 </script>

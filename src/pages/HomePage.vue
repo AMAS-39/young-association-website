@@ -8,9 +8,10 @@
         <h1 class="hero-title">{{ $t('home.heroTitle') }}</h1>
         <p class="hero-subtitle">{{ $t('home.heroSubtitle') }}</p>
         <div class="quick-links">
-          <router-link to="/membership" class="cta">{{ $t('home.joinUs') }}</router-link>
-          <router-link to="/about" class="cta">{{ $t('home.learnMore') }}</router-link>
-        </div>
+  <router-link to="/membership" class="cta">{{ $t('home.joinUs') }}</router-link>
+  <router-link to="/about" class="cta">{{ $t('home.learnMore') }}</router-link>
+</div>
+
       </div>
     </section>
 
@@ -335,5 +336,52 @@ export default {
     transform: translateY(0);
     opacity: 1;
   }
+
+
+
+
+  
 }
+
+
+
+
+
+.quick-links {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Button Styles */
+.cta {
+  padding: 12px 30px;
+  background: #f44336;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.cta:hover {
+  background: #d32f2f;
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .quick-links {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 20px;
+  }
+  
+  .cta {
+    width: 100%; /* Full width on smaller screens */
+    font-size: 1rem; /* Adjust font size for better readability */
+  }
+}
+
 </style>
