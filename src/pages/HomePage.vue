@@ -27,19 +27,39 @@
       </div>
     </section>
 
-    <!-- Highlights Section -->
-    <section class="highlights py-8 px-4 mx-auto max-w-6xl">
-      <h2 class="section-title">{{ $t('home.keyInitiativesTitle') }}</h2>
-      <div class="highlights-grid grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        <div class="highlight-card" v-for="initiative in initiatives" :key="initiative.id">
-          <div class="highlight-image-container">
-            <img :src="initiative.image" :alt="initiative.title" loading="lazy" class="highlight-image mb-4">
-          </div>
-          <h3 class="text-lg font-semibold mb-2">{{ initiative.title }}</h3>
-          <p>{{ initiative.description }}</p>
-        </div>
+  <!-- Highlights Section -->
+<section class="highlights py-8 px-4 mx-auto max-w-6xl">
+  <h2 class="section-title">{{ $t('home.keyInitiativesTitle') }}</h2>
+  <div class="highlights-grid grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <div
+      class="highlight-card"
+      v-for="(initiative, index) in initiatives"
+      :key="initiative.id"
+    >
+      <div class="highlight-image-container">
+        <img
+          :src="initiative.image"
+          :alt="initiative.title"
+          loading="lazy"
+          class="highlight-image mb-4"
+        />
       </div>
-    </section>
+      <h3 class="text-lg font-semibold mb-2">{{ initiative.title }}</h3>
+      <p>{{ initiative.description }}</p>
+
+      <!-- Use localized text for "Join Us" button -->
+      <router-link
+        v-if="index === 1"
+        to="/membership"
+        class="join-button inline-block mt-4 px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
+      >
+        {{ $t("home.joinUs") }}
+      </router-link>
+    </div>
+  </div>
+</section>
+
+
 
     <!-- Updated Testimonials Section with Modern Carousel -->
 <section class="testimonials py-12 bg-gray-50 dark:bg-gray-800 px-4">
@@ -302,6 +322,21 @@ export default {
   max-width: 80%;
   border-radius: 8px;
   margin-bottom: 15px;
+}
+.join-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #0c4da2;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.join-button:hover {
+  background-color: #083b7b;
+  transform: scale(1.05);
 }
 
 /* Testimonials Section Styling */
