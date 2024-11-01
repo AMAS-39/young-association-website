@@ -136,7 +136,7 @@ export default {
 /* Hero Section Styling */
 /* Hero Section Styling */
 .hero {
-  background-image: url('@/assets/background.png');
+  background-image: url('@/assets/history.jpg');
   background-attachment: fixed;
   background-size: cover;
   background-position: center;
