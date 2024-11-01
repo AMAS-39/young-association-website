@@ -1,15 +1,16 @@
 <template>
-  <header class="bg-kurdishGreen dark:bg-koreanBlue text-white p-4 shadow-md">
+  <header class="bg-kurdishGreen dark:bg-koreanBlue text-white p-3 md:p-4 shadow-md">
     <div class="container mx-auto flex items-center justify-between">
       <!-- Logo / Brand Name -->
-      <router-link to="/" class="flex items-center space-x-2 text-lg md:text-xl font-bold text-white">
-        <img :src="logoSrc" alt="Logo" class="w-8 h-8 sm:w-14 sm:h-14 lg:w-20 lg:h-20" />
-        <span class="hidden sm:inline">{{ $t("header.title") }}</span>
-        <span class="inline sm:hidden">KKYA</span>
+      <router-link to="/" class="flex items-center space-x-2 text-base md:text-lg lg:text-xl font-bold text-white">
+        <img :src="logoSrc" alt="Logo" class="w-8 h-8 md:w-14 md:h-14 lg:w-20 lg:h-20" />
+        <!-- Show full title only on lg and above, abbreviation on smaller screens -->
+        <span class="hidden lg:inline">{{ $t("header.title") }}</span>
+        <span class="inline lg:hidden">KKYA</span>
       </router-link>
 
       <!-- Desktop Navigation Links -->
-      <nav class="hidden md:flex text-base md:text-lg lg:text-xl space-x-4 ml-auto">
+      <nav class="hidden md:flex text-sm md:text-base lg:text-lg space-x-2 md:space-x-4 ml-auto">
         <router-link to="/" class="hover:text-gray-300">{{ $t("header.home") }}</router-link>
         <router-link to="/about" class="hover:text-gray-300">{{ $t("header.about") }}</router-link>
         <router-link to="/events" class="hover:text-gray-300">{{ $t("header.events") }}</router-link>
@@ -20,14 +21,14 @@
       </nav>
 
       <!-- Language Dropdown and Burger Menu (Mobile) -->
-      <div class="flex items-center ml-4 space-x-4 relative">
+      <div class="flex items-center ml-4 space-x-3 relative">
         <!-- Language Dropdown with Custom Styling -->
         <div class="relative">
-          <button @click="toggleLanguageMenu" class="bg-white text-gray-800 dark:bg-gray-200 dark:text-gray-900 font-semibold px-3 py-2 rounded-lg shadow transition hover:bg-gray-100 dark:hover:bg-gray-300">
+          <button @click="toggleLanguageMenu" class="bg-white text-gray-800 dark:bg-gray-200 dark:text-gray-900 font-semibold px-3 py-2 rounded-lg shadow transition hover:bg-gray-100 dark:hover:bg-gray-300 text-sm md:text-base">
             {{ languageLabel }}
           </button>
           <transition name="fade">
-            <div v-if="languageMenuOpen" class="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg shadow-lg z-20">
+            <div v-if="languageMenuOpen" class="absolute right-0 mt-2 w-28 md:w-36 bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg shadow-lg z-20">
               <button @click="changeLanguage('en')" class="block px-4 py-2 text-left w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                 English
               </button>
@@ -137,16 +138,11 @@ export default {
   background-color: #0c4da2;
 }
 
-/* Responsive Styles */
+/* Responsive Adjustments */
 @media (max-width: 1024px) {
+  /* Switch to KKYA on tablet and below */
   .text-lg {
     font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .text-lg {
-    font-size: 1rem;
   }
   .partner-logo {
     width: 100px;

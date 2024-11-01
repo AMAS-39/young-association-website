@@ -138,8 +138,8 @@ export default {
 .hero {
   background-image: url('@/assets/history.jpg');
   background-attachment: fixed;
-  background-size: cover;
   background-position: center;
+  background-size: cover; /* Default for larger screens */
   color: #ffffff;
   padding: 120px 20px;
   text-align: center;
@@ -149,34 +149,38 @@ export default {
   position: relative;
   min-height: 100vh; /* Using vh instead of dvh for mobile stability */
 }
+
 .hero-overlay {
   background: rgba(0, 0, 0, 0.7);
   padding: 40px;
   border-radius: 12px;
   animation: fadeIn 1s ease-in-out;
 }
+
 .hero-title {
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 20px;
   animation: slideIn 1s ease-in-out;
 }
+
 .hero-subtitle {
   font-size: 1.2rem;
   margin-bottom: 30px;
   color: #cfd8dc;
 }
 
-/* Updated Button Styles for Hero Section */
+/* Button Styles */
 .quick-links {
   display: flex;
   gap: 10px;
   justify-content: center;
   margin-top: 20px;
 }
+
 .cta {
   padding: 12px 30px;
-  background: #0c4da2; /* Updated color to match theme */
+  background: #0c4da2;
   color: white;
   border-radius: 8px;
   font-weight: bold;
@@ -184,21 +188,46 @@ export default {
   text-align: center;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
+
 .cta:hover {
-  background: #083b7b; /* Darker hover effect */
+  background: #083b7b;
   transform: scale(1.05);
 }
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .hero {
+    background-size: contain; /* Ensure the whole image fits on screen */
+  }
+}
+
 @media (max-width: 768px) {
+  .hero {
+    background-attachment: scroll; /* Disable parallax effect for smoother scrolling */
+    background-size: cover; /* Cover the mobile screen without zooming */
+    min-height: 60vh; /* Adjust height for smaller screens */
+  }
+  
+  .hero-title {
+    font-size: 2.5rem; /* Adjust font size for mobile */
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
   .quick-links {
     flex-direction: column;
     width: 100%;
     padding: 0 20px;
   }
+
   .cta {
-    width: 100%; /* Full width on smaller screens */
+    width: 100%;
     font-size: 1rem;
   }
 }
+
 
 /* About Section */
 .section-title {
