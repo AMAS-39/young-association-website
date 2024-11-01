@@ -3,13 +3,13 @@
     <div class="container mx-auto flex items-center justify-between">
       <!-- Logo / Brand Name -->
       <router-link to="/" class="flex items-center space-x-2 text-lg md:text-xl font-bold text-white">
-        <img :src="logoSrc" alt="Logo" class="w-10 h-10 sm:w-20 sm:h-20" />
+        <img :src="logoSrc" alt="Logo" class="w-8 h-8 sm:w-14 sm:h-14 lg:w-20 lg:h-20" />
         <span class="hidden sm:inline">{{ $t("header.title") }}</span>
         <span class="inline sm:hidden">KKYA</span>
       </router-link>
 
       <!-- Desktop Navigation Links -->
-      <nav class="hidden md:flex text-base md:text-lg space-x-4 ml-auto">
+      <nav class="hidden md:flex text-base md:text-lg lg:text-xl space-x-4 ml-auto">
         <router-link to="/" class="hover:text-gray-300">{{ $t("header.home") }}</router-link>
         <router-link to="/about" class="hover:text-gray-300">{{ $t("header.about") }}</router-link>
         <router-link to="/events" class="hover:text-gray-300">{{ $t("header.events") }}</router-link>
@@ -23,7 +23,7 @@
       <div class="flex items-center ml-4 space-x-4 relative">
         <!-- Language Dropdown with Custom Styling -->
         <div class="relative">
-          <button @click="toggleLanguageMenu" class="bg-white text-gray-800 dark:bg-gray-200 dark:text-gray-900 font-semibold px-4 py-2 rounded-lg shadow transition hover:bg-gray-100 dark:hover:bg-gray-300">
+          <button @click="toggleLanguageMenu" class="bg-white text-gray-800 dark:bg-gray-200 dark:text-gray-900 font-semibold px-3 py-2 rounded-lg shadow transition hover:bg-gray-100 dark:hover:bg-gray-300">
             {{ languageLabel }}
           </button>
           <transition name="fade">
@@ -138,9 +138,19 @@ export default {
 }
 
 /* Responsive Styles */
-@media (max-width: 928px) {
+@media (max-width: 1024px) {
   .text-lg {
-    font-size: 1rem; /* Adjust font size for 928px width */
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .text-lg {
+    font-size: 1rem;
+  }
+  .partner-logo {
+    width: 100px;
+    max-width: 120px;
   }
 }
 </style>
