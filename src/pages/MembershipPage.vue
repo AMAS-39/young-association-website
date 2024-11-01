@@ -10,7 +10,7 @@
           {{ $t('membership.description') }}
         </p>
         <a
-          href="https://docs.google.com/forms/d/e/your-google-form-link" 
+          href="https://forms.gle/JvHLY7Uk32rbLQyZ6" 
           target="_blank" 
           rel="noopener noreferrer"
           class="cta-button"

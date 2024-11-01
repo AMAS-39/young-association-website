@@ -132,7 +132,7 @@ export default {
 }
 
 .bg-kurdishGreen {
-  background-color: #206958;
+  background-color: #266e6e;
 }
 .bg-koreanBlue {
   background-color: #0c4da2;

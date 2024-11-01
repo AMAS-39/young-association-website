@@ -15,7 +15,7 @@ export default {
 
 <style scoped>
 .bg-kurdishGreen {
-  background-color: #009b77;
+  background-color:#266e6e;
 }
 
 .bg-koreanBlue {

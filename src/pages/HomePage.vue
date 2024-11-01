@@ -210,7 +210,7 @@ export default {
 }
 
 .cta:hover {
-  background: #083b7b;
+  background: #031b39;
   transform: scale(1.05);
 }
 
@@ -335,7 +335,7 @@ export default {
 }
 
 .join-button:hover {
-  background-color: #083b7b;
+  background-color: #051d3b;
   transform: scale(1.05);
 }
 
@@ -492,7 +492,7 @@ export default {
   transition: color 0.3s ease;
 }
 .partner-item:hover .partner-name {
-  color: #009b77;
+  color: #214a6c;
 }
 
 /* Responsive Adjustments */
