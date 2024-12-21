@@ -7,12 +7,12 @@
       <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
         {{ $t('eventsPage.pastTitle') }}
       </h2>
-      <div v-if="pastEvents.length === 0" class="text-center text-gray-600 dark:text-gray-400">
+      <div v-if="!pastEvents.length" class="text-center text-gray-600 dark:text-gray-400 p-8">
         {{ $t('eventsPage.noEvents') }}
       </div>
       <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <EventCard 
-          v-for="event in pastEvents" 
+          v-for="event in sortedPastEvents" 
           :key="event.id" 
           :event="event" 
         />
@@ -36,45 +36,80 @@ export default {
   },
   data() {
     return {
-      upcomingEvents: [],
       pastEvents: [],
     };
+  },
+  computed: {
+    sortedPastEvents() {
+      return [...this.pastEvents].sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
   },
   created() {
     this.fetchEvents();
   },
+  mounted() {
+    // Add event listener for storage changes
+    window.addEventListener('storage', this.fetchEvents);
+  },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.fetchEvents);
+  },
   methods: {
     fetchEvents() {
       try {
-        // Fetch events data from localStorage
-        const events = JSON.parse(localStorage.getItem('events')) || [];
-        const today = new Date().toISOString().slice(0, 10);
-        
-        // Ensure each event has the correct structure
-        const validEvents = events.map(event => ({
-          id: event.id,
-          date: event.date,
-          imageUrl: event.imageUrl,
-          en: {
-            title: event?.en?.title || '',
-            description: event?.en?.description || ''
-          },
-          ku: {
-            title: event?.ku?.title || '',
-            description: event?.ku?.description || ''
-          }
-        }));
-        
-        // Filter events
-        this.upcomingEvents = validEvents.filter(event => event.date >= today);
-        this.pastEvents = validEvents.filter(event => event.date < today);
+        // Get events from localStorage
+        const storedEvents = localStorage.getItem('events');
+        if (!storedEvents) {
+          this.pastEvents = [];
+          return;
+        }
+
+        const events = JSON.parse(storedEvents);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Filter and validate events
+        this.pastEvents = events
+          .filter(event => {
+            const eventDate = new Date(event.date);
+            eventDate.setHours(0, 0, 0, 0);
+            return eventDate < today && this.isValidEvent(event);
+          })
+          .map(event => this.normalizeEvent(event));
+
       } catch (error) {
         console.error('Error fetching events:', error);
-        this.upcomingEvents = [];
         this.pastEvents = [];
       }
     },
-  },
+    isValidEvent(event) {
+      return (
+        event &&
+        event.id &&
+        event.date &&
+        event.imageUrl &&
+        event.en?.title &&
+        event.en?.description &&
+        event.ku?.title &&
+        event.ku?.description
+      );
+    },
+    normalizeEvent(event) {
+      return {
+        id: event.id,
+        date: event.date,
+        imageUrl: event.imageUrl,
+        en: {
+          title: event.en.title,
+          description: event.en.description
+        },
+        ku: {
+          title: event.ku.title,
+          description: event.ku.description
+        }
+      };
+    }
+  }
 };
 </script>
 
