@@ -20,9 +20,9 @@
           <div v-for="event in events" :key="event.id" class="p-4 bg-white dark:bg-gray-700 shadow rounded-lg flex justify-between items-center">
             <div>
               <img :src="event.imageUrl" alt="Event Image" class="w-16 h-16 object-cover rounded-lg mb-2">
-              <h3 class="text-xl font-bold">{{ event.title }}</h3>
+              <h3 class="text-xl font-bold">{{ currentLanguage === 'en' ? event.en.title : event.ku.title }}</h3>
               <p class="text-gray-600 dark:text-gray-300">{{ event.date }}</p>
-              <p class="text-gray-700 dark:text-gray-200">{{ event.description }}</p>
+              <p class="text-gray-700 dark:text-gray-200">{{ currentLanguage === 'en' ? event.en.description : event.ku.description }}</p>
             </div>
             <div class="space-x-2">
               <button class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600" @click="openEventForm(event)">Edit</button>
@@ -34,25 +34,51 @@
 
       <!-- Event Form Modal -->
       <div v-if="showEventForm" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-2xl w-full">
           <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">{{ isEditingEvent ? 'Edit Event' : 'Add New Event' }}</h2>
-          <form @submit.prevent="saveEvent">
-            <div class="mb-4">
-              <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Title</label>
-              <input type="text" v-model="eventForm.title" class="w-full p-3 border rounded-lg" required />
+          <form @submit.prevent="saveEvent" class="space-y-6">
+            <!-- Common Fields -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="mb-4">
+                <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Date</label>
+                <input type="date" v-model="eventForm.date" class="w-full p-3 border rounded-lg" required />
+              </div>
+              <div class="mb-4">
+                <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Image URL</label>
+                <input type="url" v-model="eventForm.imageUrl" class="w-full p-3 border rounded-lg" placeholder="Image URL" required />
+              </div>
             </div>
-            <div class="mb-4">
-              <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Date</label>
-              <input type="date" v-model="eventForm.date" class="w-full p-3 border rounded-lg" required />
+
+            <!-- English Content -->
+            <div class="border-t pt-4">
+              <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">English Content</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Title (English)</label>
+                  <input type="text" v-model="eventForm.en.title" class="w-full p-3 border rounded-lg" required />
+                </div>
+                <div>
+                  <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Description (English)</label>
+                  <textarea v-model="eventForm.en.description" rows="3" class="w-full p-3 border rounded-lg" required></textarea>
+                </div>
+              </div>
             </div>
-            <div class="mb-4">
-              <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Description</label>
-              <textarea v-model="eventForm.description" rows="3" class="w-full p-3 border rounded-lg" required></textarea>
+
+            <!-- Kurdish Content -->
+            <div class="border-t pt-4">
+              <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Kurdish Content</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Title (Kurdish)</label>
+                  <input type="text" v-model="eventForm.ku.title" class="w-full p-3 border rounded-lg text-right" dir="rtl" required />
+                </div>
+                <div>
+                  <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Description (Kurdish)</label>
+                  <textarea v-model="eventForm.ku.description" rows="3" class="w-full p-3 border rounded-lg text-right" dir="rtl" required></textarea>
+                </div>
+              </div>
             </div>
-            <div class="mb-4">
-              <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Image URL</label>
-              <input type="url" v-model="eventForm.imageUrl" class="w-full p-3 border rounded-lg" placeholder="Image URL" required />
-            </div>
+
             <div class="flex justify-end space-x-4">
               <button type="button" @click="closeForm" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</button>
               <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
@@ -74,6 +100,11 @@ export default {
       this.$router.push("/login");
     }
   },
+  computed: {
+    currentLanguage() {
+      return this.$i18n.locale || 'en';
+    }
+  },
   data() {
     return {
       events: JSON.parse(localStorage.getItem('events')) || [],
@@ -81,33 +112,67 @@ export default {
       isEditingEvent: false,
       eventForm: {
         id: null,
-        title: '',
         date: '',
-        description: '',
-        imageUrl: ''
+        imageUrl: '',
+        en: {
+          title: '',
+          description: ''
+        },
+        ku: {
+          title: '',
+          description: ''
+        }
       }
     };
   },
   methods: {
     openEventForm(event = null) {
       this.isEditingEvent = !!event;
-      this.eventForm = event ? { ...event } : {
-        id: Date.now(),
-        title: '',
-        date: '',
-        description: '',
-        imageUrl: ''
-      };
+      if (event) {
+        this.eventForm = {
+          ...event,
+          en: { ...event.en },
+          ku: { ...event.ku }
+        };
+      } else {
+        this.eventForm = {
+          id: Date.now(),
+          date: '',
+          imageUrl: '',
+          en: {
+            title: '',
+            description: ''
+          },
+          ku: {
+            title: '',
+            description: ''
+          }
+        };
+      }
       this.showEventForm = true;
     },
     saveEvent() {
+      const eventData = {
+        id: this.eventForm.id,
+        date: this.eventForm.date,
+        imageUrl: this.eventForm.imageUrl,
+        en: {
+          title: this.eventForm.en.title,
+          description: this.eventForm.en.description
+        },
+        ku: {
+          title: this.eventForm.ku.title,
+          description: this.eventForm.ku.description
+        }
+      };
+
       if (this.isEditingEvent) {
         const index = this.events.findIndex(event => event.id === this.eventForm.id);
         if (index !== -1) {
-          this.events.splice(index, 1, { ...this.eventForm });
+          this.events.splice(index, 1, eventData);
         }
       } else {
-        this.events.push({ ...this.eventForm });
+        this.events.push(eventData);
       }
       localStorage.setItem('events', JSON.stringify(this.events));
       this.closeForm();
