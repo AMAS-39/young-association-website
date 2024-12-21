@@ -52,7 +52,7 @@
       <nav v-if="menuOpen" class="md:hidden mt-4 space-y-4 text-center bg-gray-800 p-4 rounded shadow-lg">
         <router-link to="/" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.home") }}</router-link>
         <router-link to="/about" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.about") }}</router-link>
-       <!-- <router-link to="/events" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.events") }}</router-link>-->
+       <router-link to="/events" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.events") }}</router-link>
         <!--<router-link to="/news" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.news") }}</router-link>-->
         <router-link to="/membership" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.membership") }}</router-link>
         <!-- <router-link to="/gallery" @click="closeMenu" class="block hover:text-gray-300">{{ $t("header.gallery") }}</router-link>-->
