@@ -1,5 +1,12 @@
 <template>
   <div class="min-h-screen bg-light-background dark:bg-dark-background">
+    <!-- Debug Info -->
+    <div class="p-4 bg-yellow-200" v-if="debug">
+      <p>Debug Info:</p>
+      <p>Auth Status: {{ isAuthenticated ? 'Authenticated' : 'Not Authenticated' }}</p>
+      <p>Events Count: {{ events.length }}</p>
+    </div>
+
     <MainHeader />
     
     <div class="flex">
@@ -25,6 +32,10 @@
           <button @click="openEventForm" class="mb-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
             Add New Event
           </button>
+
+          <div v-if="events.length === 0" class="text-gray-600 dark:text-gray-400 text-center py-8">
+            No events yet. Click "Add New Event" to create one.
+          </div>
 
           <div class="space-y-4">
             <div v-for="event in events" :key="event.id" class="p-4 bg-white dark:bg-gray-700 shadow rounded-lg">
@@ -124,6 +135,8 @@ export default {
   },
   data() {
     return {
+      debug: true, // Enable debugging
+      isAuthenticated: false,
       events: [],
       showEventForm: false,
       isEditingEvent: false,
@@ -143,11 +156,35 @@ export default {
     };
   },
   created() {
-    // Load events from localStorage
-    this.events = JSON.parse(localStorage.getItem('events')) || [];
+    console.log('AdminAccess component created');
+    this.checkAuthentication();
+    this.loadEvents();
   },
   methods: {
+    checkAuthentication() {
+      console.log('Checking authentication...');
+      this.isAuthenticated = !!localStorage.getItem('isAuthenticated');
+      console.log('Authentication status:', this.isAuthenticated);
+      
+      if (!this.isAuthenticated) {
+        console.log('Not authenticated, redirecting to login...');
+        this.$router.push('/login');
+        return false;
+      }
+      return true;
+    },
+    loadEvents() {
+      try {
+        const storedEvents = localStorage.getItem('events');
+        console.log('Loading events from storage:', storedEvents);
+        this.events = storedEvents ? JSON.parse(storedEvents) : [];
+      } catch (error) {
+        console.error('Error loading events:', error);
+        this.events = [];
+      }
+    },
     openEventForm(event = null) {
+      console.log('Opening event form with event:', event);
       this.isEditingEvent = !!event;
       if (event) {
         this.eventForm = { ...event };
@@ -163,6 +200,7 @@ export default {
       this.showEventForm = true;
     },
     saveEvent() {
+      console.log('Saving event:', this.eventForm);
       if (this.isEditingEvent) {
         const index = this.events.findIndex(e => e.id === this.eventForm.id);
         if (index !== -1) {
@@ -175,13 +213,16 @@ export default {
       this.closeForm();
     },
     deleteEvent(id) {
+      console.log('Deleting event:', id);
       this.events = this.events.filter(event => event.id !== id);
       localStorage.setItem('events', JSON.stringify(this.events));
     },
     closeForm() {
+      console.log('Closing form');
       this.showEventForm = false;
     },
     logout() {
+      console.log('Logging out...');
       localStorage.removeItem('isAuthenticated');
       this.$router.push('/login');
     }
