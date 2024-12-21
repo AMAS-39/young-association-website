@@ -13,7 +13,7 @@
       <nav class="hidden md:flex text-sm md:text-base lg:text-lg space-x-2 md:space-x-4 ml-auto">
         <router-link to="/" class="hover:text-gray-300">{{ $t("header.home") }}</router-link>
         <router-link to="/about" class="hover:text-gray-300">{{ $t("header.about") }}</router-link>
-       <!-- <router-link to="/events" class="hover:text-gray-300">{{ $t("header.events") }}</router-link>-->
+       <router-link to="/events" class="hover:text-gray-300">{{ $t("header.events") }}</router-link>
         <!--<router-link to="/news" class="hover:text-gray-300">{{ $t("header.news") }}</router-link>-->
         <router-link to="/membership" class="hover:text-gray-300">{{ $t("header.membership") }}</router-link>
        <!-- <router-link to="/gallery" class="hover:text-gray-300">{{ $t("header.gallery") }}</router-link>-->
