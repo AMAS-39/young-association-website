@@ -2,14 +2,14 @@
   <div class="bg-light-background dark:bg-dark-background min-h-screen">
     <Header />
 
-    <!-- Upcoming Events Section -->
+    <!-- Upcoming Events Section 
     <section class="p-6 max-w-6xl mx-auto">
       <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4 text-center">{{ $t('eventsPage.upcomingTitle') }}</h1>
       <p class="text-lg text-center text-gray-700 dark:text-gray-300 mb-8">{{ $t('eventsPage.upcomingDescription') }}</p>
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <EventCard v-for="event in upcomingEvents" :key="event.id" :event="event" />
       </div>
-    </section>
+    </section>-->
 
     <!-- Past Events Section -->
     <section class="p-6 max-w-6xl mx-auto mt-12">
