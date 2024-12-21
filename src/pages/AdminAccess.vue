@@ -1,6 +1,6 @@
+```vue
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Sidebar and Main Content Container -->
     <div class="flex min-h-screen">
       <!-- Sidebar -->
       <aside class="w-64 bg-white dark:bg-gray-800 shadow-md">
@@ -32,19 +32,25 @@
                     <img :src="event.imageUrl" alt="Event" class="w-20 h-20 object-cover rounded-lg">
                     <div>
                       <div class="mb-4">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ event.en.title }}</h3>
-                        <p class="text-sm text-gray-500">{{ event.date }}</p>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+                          {{ (event.en && event.en.title) || 'No title' }}
+                        </h3>
+                        <p class="text-sm text-gray-500">{{ event.date || 'No date' }}</p>
                       </div>
                       <div class="grid grid-cols-2 gap-6">
                         <!-- English Content -->
                         <div>
                           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-1">English</h4>
-                          <p class="text-gray-600 dark:text-gray-400">{{ event.en.description }}</p>
+                          <p class="text-gray-600 dark:text-gray-400">
+                            {{ (event.en && event.en.description) || 'No description' }}
+                          </p>
                         </div>
                         <!-- Kurdish Content -->
                         <div>
                           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-1">Kurdish</h4>
-                          <p class="text-gray-600 dark:text-gray-400 text-right" dir="rtl">{{ event.ku.description }}</p>
+                          <p class="text-gray-600 dark:text-gray-400 text-right" dir="rtl">
+                            {{ (event.ku && event.ku.description) || 'No description' }}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -138,19 +144,7 @@ export default {
       events: [],
       showEventForm: false,
       isEditingEvent: false,
-      eventForm: {
-        id: null,
-        date: '',
-        imageUrl: '',
-        en: {
-          title: '',
-          description: ''
-        },
-        ku: {
-          title: '',
-          description: ''
-        }
-      }
+      eventForm: this.getEmptyEventForm()
     }
   },
   created() {
@@ -163,46 +157,93 @@ export default {
     // Load events
     try {
       const savedEvents = localStorage.getItem('events');
-      this.events = savedEvents ? JSON.parse(savedEvents) : [];
+      if (savedEvents) {
+        const parsedEvents = JSON.parse(savedEvents);
+        // Ensure each event has the correct structure
+        this.events = parsedEvents.map(event => ({
+          id: event.id || Date.now(),
+          date: event.date || '',
+          imageUrl: event.imageUrl || '',
+          en: {
+            title: event?.en?.title || '',
+            description: event?.en?.description || ''
+          },
+          ku: {
+            title: event?.ku?.title || '',
+            description: event?.ku?.description || ''
+          }
+        }));
+      } else {
+        this.events = [];
+      }
     } catch (error) {
       console.error('Error loading events:', error);
       this.events = [];
     }
   },
   methods: {
+    getEmptyEventForm() {
+      return {
+        id: Date.now(),
+        date: '',
+        imageUrl: '',
+        en: {
+          title: '',
+          description: ''
+        },
+        ku: {
+          title: '',
+          description: ''
+        }
+      };
+    },
     openEventForm(event = null) {
       this.isEditingEvent = !!event;
       if (event) {
-        // Deep copy for editing
-        this.eventForm = JSON.parse(JSON.stringify(event));
-      } else {
-        // Reset form for new event
+        // Ensure proper structure when editing
         this.eventForm = {
-          id: Date.now(),
-          date: '',
-          imageUrl: '',
+          id: event.id || Date.now(),
+          date: event.date || '',
+          imageUrl: event.imageUrl || '',
           en: {
-            title: '',
-            description: ''
+            title: event?.en?.title || '',
+            description: event?.en?.description || ''
           },
           ku: {
-            title: '',
-            description: ''
+            title: event?.ku?.title || '',
+            description: event?.ku?.description || ''
           }
         };
+      } else {
+        this.eventForm = this.getEmptyEventForm();
       }
       this.showEventForm = true;
     },
     saveEvent() {
       try {
+        const eventData = {
+          id: this.eventForm.id,
+          date: this.eventForm.date,
+          imageUrl: this.eventForm.imageUrl,
+          en: {
+            title: this.eventForm.en.title,
+            description: this.eventForm.en.description
+          },
+          ku: {
+            title: this.eventForm.ku.title,
+            description: this.eventForm.ku.description
+          }
+        };
+
         if (this.isEditingEvent) {
           const index = this.events.findIndex(e => e.id === this.eventForm.id);
           if (index !== -1) {
-            this.events.splice(index, 1, JSON.parse(JSON.stringify(this.eventForm)));
+            this.events.splice(index, 1, eventData);
           }
         } else {
-          this.events.push(JSON.parse(JSON.stringify(this.eventForm)));
+          this.events.push(eventData);
         }
+        
         localStorage.setItem('events', JSON.stringify(this.events));
         this.closeForm();
       } catch (error) {
@@ -219,6 +260,7 @@ export default {
     closeForm() {
       this.showEventForm = false;
       this.isEditingEvent = false;
+      this.eventForm = this.getEmptyEventForm();
     },
     logout() {
       localStorage.removeItem('isAuthenticated');
@@ -229,10 +271,17 @@ export default {
 </script>
 
 <style scoped>
+
 .bg-light-background {
+
   background-color: #f7fafc;
+
 }
+
 .bg-dark-background {
+
   background-color: #1a202c;
+
 }
 </style>
+```
