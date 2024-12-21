@@ -1,6 +1,5 @@
 <template>
- 
-
+  <div class="bg-light-background dark:bg-dark-background min-h-screen flex">
     <!-- Sidebar for Admin Navigation -->
     <aside class="w-1/4 bg-gray-100 dark:bg-gray-800 p-6">
       <h2 class="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-4">Admin Dashboard</h2>
@@ -68,13 +67,8 @@
 </template>
 
 <script>
-import Header from '@/components/MainHeader.vue';
-
 export default {
   name: 'AdminAccess',
-  components: {
-    Header
-  },
   created() {
     if (!localStorage.getItem("isAuthenticated")) {
       this.$router.push("/login");
