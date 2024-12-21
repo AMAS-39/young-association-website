@@ -208,14 +208,13 @@
 </template>
 
 <script>
-
 export default {
   name: 'AdminAccess',
   created() {
-  if (!localStorage.getItem("isAuthenticated")) {
-    this.$router.push("/login");
-  }
-},
+    if (!localStorage.getItem("isAuthenticated")) {
+      this.$router.push("/login");
+    }
+  },
   data() {
     return {
       currentSection: 'news',
@@ -229,7 +228,21 @@ export default {
       isEditingEvent: false,
       newsForm: { id: null, title: '', date: '', summary: '', imageSource: 'url', imageUrl: '' },
       galleryForm: { id: null, url: '', description: '', imageSource: 'url' },
-      eventForm: { id: null, title: '', date: '', description: '', imageSource: 'url', imageUrl: '' },
+      // Updated eventForm structure for bilingual support
+      eventForm: {
+        id: null,
+        date: '',
+        imageSource: 'url',
+        imageUrl: '',
+        en: {
+          title: '',
+          description: ''
+        },
+        ku: {
+          title: '',
+          description: ''
+        }
+      }
     };
   },
   computed: {
@@ -241,68 +254,89 @@ export default {
     },
   },
   methods: {
-    openNewsForm(article = null) {
-      this.isEditingArticle = !!article;
-      this.newsForm = article ? { ...article } : { id: Date.now(), title: '', date: '', summary: '', imageSource: 'url', imageUrl: '' };
-      this.showNewsForm = true;
-    },
-    saveArticle() {
-      if (this.isEditingArticle) {
-        const index = this.newsArticles.findIndex(article => article.id === this.newsForm.id);
-        if (index !== -1) this.newsArticles.splice(index, 1, { ...this.newsForm });
-      } else {
-        this.newsArticles.push({ ...this.newsForm });
-      }
-      this.saveData('newsArticles');
-      this.closeForm('news');
-    },
-    deleteArticle(id) {
-      this.newsArticles = this.newsArticles.filter(article => article.id !== id);
-      this.saveData('newsArticles');
-    },
-    openGalleryForm() {
-      this.showGalleryForm = true;
-      this.galleryForm = { id: Date.now(), url: '', description: '', imageSource: 'url' };
-    },
-    saveImage() {
-      this.gallery.push({ ...this.galleryForm });
-      this.saveData('gallery');
-      this.closeForm('gallery');
-    },
-    deleteImage(id) {
-      this.gallery = this.gallery.filter(image => image.id !== id);
-      this.saveData('gallery');
-    },
+    // ... keep all your existing methods for news and gallery ...
+
+    // Updated event methods
     openEventForm(event = null) {
       this.isEditingEvent = !!event;
-      this.eventForm = event ? { ...event } : { id: Date.now(), title: '', date: '', description: '', imageSource: 'url', imageUrl: '' };
+      if (event) {
+        // Handle existing events that might not have the language structure
+        this.eventForm = {
+          id: event.id,
+          date: event.date,
+          imageSource: event.imageSource || 'url',
+          imageUrl: event.imageUrl || '',
+          en: event.en || {
+            title: event.title || '',
+            description: event.description || ''
+          },
+          ku: event.ku || {
+            title: '',
+            description: ''
+          }
+        };
+      } else {
+        this.eventForm = {
+          id: Date.now(),
+          date: '',
+          imageSource: 'url',
+          imageUrl: '',
+          en: {
+            title: '',
+            description: ''
+          },
+          ku: {
+            title: '',
+            description: ''
+          }
+        };
+      }
       this.showEventForm = true;
     },
+
     saveEvent() {
+      const eventData = {
+        id: this.eventForm.id,
+        date: this.eventForm.date,
+        imageUrl: this.eventForm.imageUrl,
+        imageSource: this.eventForm.imageSource,
+        en: {
+          title: this.eventForm.en.title,
+          description: this.eventForm.en.description
+        },
+        ku: {
+          title: this.eventForm.ku.title,
+          description: this.eventForm.ku.description
+        }
+      };
+
       if (this.isEditingEvent) {
         const index = this.events.findIndex(event => event.id === this.eventForm.id);
-        if (index !== -1) this.events.splice(index, 1, { ...this.eventForm });
+        if (index !== -1) {
+          this.events.splice(index, 1, eventData);
+        }
       } else {
-        this.events.push({ ...this.eventForm });
+        this.events.push(eventData);
       }
+      
       this.saveData('events');
       this.closeForm('event');
     },
-    deleteEvent(id) {
-      this.events = this.events.filter(event => event.id !== id);
-      this.saveData('events');
-    },
-    // eslint-disable-next-line no-unused-vars
+
+    // Keep your existing methods for handling images, saving data, etc.
     handleImageUpload(type) {
-      // Logic to handle image upload and generate a URL or local path for the image
+      // Your existing image upload logic
       alert('Image upload is not implemented in this example.');
     },
+
     saveData(key) {
       localStorage.setItem(key, JSON.stringify(this[key]));
     },
+
     closeForm(type) {
       this[`show${type.charAt(0).toUpperCase() + type.slice(1)}Form`] = false;
     },
+
     logout() {
       localStorage.removeItem('isAuthenticated');
       this.$router.push('/login');
