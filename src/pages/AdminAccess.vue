@@ -105,13 +105,11 @@
 
 <script>
 import Header from '@/components/MainHeader.vue';
-import Footer from '@/components/MainFooter.vue';
 
 export default {
   name: 'AdminAccess',
   components: {
-    Header,
-    Footer
+    Header
   },
   created() {
     if (!localStorage.getItem("isAuthenticated")) {
