@@ -11,13 +11,12 @@
       </nav>
     </aside>
 
-    <!-- Main Content Area for Admin Actions -->
+    <!-- Main Content Area -->
     <main class="flex-1 p-8">
       <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Manage Events</h1>
 
-      <!-- Events Section -->
+      <!-- Events List -->
       <div>
-        <h2 class="text-2xl font-semibold text-black mb-4">Events</h2>
         <button class="mb-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600" @click="openEventForm()">Add New Event</button>
         <div class="space-y-4">
           <div v-for="event in events" :key="event.id" class="p-4 bg-white dark:bg-gray-700 shadow rounded-lg flex justify-between items-center">
@@ -53,17 +52,14 @@
               <textarea v-model="eventForm.description" rows="3" class="w-full p-3 border rounded-lg" required></textarea>
             </div>
             <div class="mb-4">
-              <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Image</label>
-              <select v-model="eventForm.imageSource" class="w-full p-3 border rounded-lg mb-2">
-                <option value="url">Use Image URL</option>
-                <option value="upload">Upload Image</option>
-              </select>
-              <input v-if="eventForm.imageSource === 'url'" type="url" v-model="eventForm.imageUrl" placeholder="Image URL" class="w-full p-3 border rounded-lg mb-2" />
-              <input v-if="eventForm.imageSource === 'upload'" type="file" @change="handleImageUpload('event')" class="w-full p-3 border rounded-lg mb-2" />
+              <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Image URL</label>
+              <input type="url" v-model="eventForm.imageUrl" class="w-full p-3 border rounded-lg" placeholder="Image URL" required />
             </div>
             <div class="flex justify-end space-x-4">
-              <button type="button" @click="closeForm('event')" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</button>
-              <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{{ isEditingEvent ? 'Update Event' : 'Add Event' }}</button>
+              <button type="button" @click="closeForm" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                {{ isEditingEvent ? 'Update Event' : 'Add Event' }}
+              </button>
             </div>
           </form>
         </div>
@@ -90,40 +86,51 @@ export default {
       events: JSON.parse(localStorage.getItem('events')) || [],
       showEventForm: false,
       isEditingEvent: false,
-      eventForm: { id: null, title: '', date: '', description: '', imageSource: 'url', imageUrl: '' },
+      eventForm: {
+        id: null,
+        title: '',
+        date: '',
+        description: '',
+        imageUrl: ''
+      }
     };
   },
   methods: {
     openEventForm(event = null) {
       this.isEditingEvent = !!event;
-      this.eventForm = event ? { ...event } : { id: Date.now(), title: '', date: '', description: '', imageSource: 'url', imageUrl: '' };
+      this.eventForm = event ? { ...event } : {
+        id: Date.now(),
+        title: '',
+        date: '',
+        description: '',
+        imageUrl: ''
+      };
       this.showEventForm = true;
     },
     saveEvent() {
       if (this.isEditingEvent) {
         const index = this.events.findIndex(event => event.id === this.eventForm.id);
-        if (index !== -1) this.events.splice(index, 1, { ...this.eventForm });
+        if (index !== -1) {
+          this.events.splice(index, 1, { ...this.eventForm });
+        }
       } else {
         this.events.push({ ...this.eventForm });
       }
       localStorage.setItem('events', JSON.stringify(this.events));
-      this.closeForm('event');
+      this.closeForm();
     },
     deleteEvent(id) {
       this.events = this.events.filter(event => event.id !== id);
       localStorage.setItem('events', JSON.stringify(this.events));
     },
-    handleImageUpload(type) {
-      alert('Image upload is not implemented in this example.');
-    },
-    closeForm(type) {
-      this[`show${type.charAt(0).toUpperCase() + type.slice(1)}Form`] = false;
+    closeForm() {
+      this.showEventForm = false;
     },
     logout() {
       localStorage.removeItem('isAuthenticated');
       this.$router.push('/login');
     }
-  },
+  }
 };
 </script>
 
