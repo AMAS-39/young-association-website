@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Event Card -->
-    <div class="event-card bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
+    <div class="event-card bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
       <!-- Image Container -->
       <div class="relative h-48">
         <img 
@@ -10,7 +10,7 @@
           class="w-full h-full object-cover"
           @error="handleImageError" 
         />
-        <div class="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 m-2 rounded-full text-sm">
+        <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 m-2 rounded-full text-sm">
           {{ formatDate(event.date) }}
         </div>
       </div>
@@ -18,13 +18,20 @@
       <!-- Content Container -->
       <div class="p-6">
         <!-- Title -->
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2" :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'">
-          {{ currentLanguage === 'en' ? event.en.title : event.ku.title }}
+        <h3 
+          class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2" 
+          :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'"
+          :class="{'text-right': currentLanguage === 'ku'}"
+        >
+          {{ currentContent.title }}
         </h3>
 
         <!-- Description -->
         <div :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'">
-          <p class="text-gray-600 dark:text-gray-400" :class="{'text-right': currentLanguage === 'ku'}">
+          <p 
+            class="text-gray-600 dark:text-gray-400" 
+            :class="{'text-right': currentLanguage === 'ku'}"
+          >
             {{ truncatedDescription }}
             <button 
               v-if="isLongDescription" 
@@ -40,16 +47,13 @@
 
     <!-- Modal -->
     <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <!-- Overlay -->
       <div 
         class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         @click="showModal = false"
       ></div>
       
-      <!-- Modal Content -->
       <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full p-6 shadow-xl">
-          <!-- Close Button -->
           <button 
             @click="showModal = false"
             class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -59,9 +63,7 @@
             </svg>
           </button>
 
-          <!-- Modal Content -->
           <div class="mt-2">
-            <!-- Image -->
             <img 
               :src="event.imageUrl" 
               alt="Event Image" 
@@ -69,18 +71,25 @@
               @error="handleImageError"
             />
 
-            <!-- Title -->
-            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2" :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'">
-              {{ currentLanguage === 'en' ? event.en.title : event.ku.title }}
+            <h3 
+              class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2" 
+              :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'"
+              :class="{'text-right': currentLanguage === 'ku'}"
+            >
+              {{ currentContent.title }}
             </h3>
 
-            <!-- Date -->
             <p class="text-gray-500 dark:text-gray-400 mb-4">{{ formatDate(event.date) }}</p>
 
-            <!-- Description -->
-            <div class="prose dark:prose-invert max-w-none" :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'">
-              <p class="text-gray-700 dark:text-gray-300" :class="{'text-right': currentLanguage === 'ku'}">
-                {{ currentLanguage === 'en' ? event.en.description : event.ku.description }}
+            <div 
+              class="prose dark:prose-invert max-w-none" 
+              :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'"
+            >
+              <p 
+                class="text-gray-700 dark:text-gray-300" 
+                :class="{'text-right': currentLanguage === 'ku'}"
+              >
+                {{ currentContent.description }}
               </p>
             </div>
           </div>
@@ -97,42 +106,46 @@ export default {
     event: {
       type: Object,
       required: true,
+      validator: (value) => {
+        return value && value.en && value.ku && value.date && value.imageUrl;
+      }
     },
   },
   data() {
     return {
       showModal: false,
       maxLength: 150,
-      fallbackImage: '/placeholder-image.jpg' // Add a placeholder image path
+      fallbackImage: '/placeholder-event.jpg'
     };
   },
   computed: {
     currentLanguage() {
-      return this.$i18n.locale || 'en';
+      return this.$i18n.locale || localStorage.getItem('language') || 'en';
+    },
+    currentContent() {
+      return this.currentLanguage === 'en' ? this.event.en : this.event.ku;
     },
     isLongDescription() {
-      const description = this.currentLanguage === 'en' 
-        ? this.event.en.description 
-        : this.event.ku.description;
-      return description.length > this.maxLength;
+      return this.currentContent.description.length > this.maxLength;
     },
     truncatedDescription() {
-      const description = this.currentLanguage === 'en'
-        ? this.event.en.description
-        : this.event.ku.description;
-
       if (this.isLongDescription) {
-        return description.slice(0, this.maxLength) + '...';
+        return this.currentContent.description.slice(0, this.maxLength) + '...';
       }
-      return description;
+      return this.currentContent.description;
     }
   },
   methods: {
     formatDate(date) {
-      return new Date(date).toLocaleDateString(
-        this.currentLanguage === 'en' ? 'en-US' : 'ku', 
-        { year: 'numeric', month: 'long', day: 'numeric' }
-      );
+      try {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(date).toLocaleDateString(
+          this.currentLanguage === 'en' ? 'en-US' : 'ar-IQ', 
+          options
+        );
+      } catch (error) {
+        return date;
+      }
     },
     handleImageError(e) {
       e.target.src = this.fallbackImage;
@@ -143,14 +156,14 @@ export default {
 
 <style scoped>
 .event-card {
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .event-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Add smooth transition for modal */
 .modal-enter-active, .modal-leave-active {
   transition: opacity 0.3s ease;
 }
