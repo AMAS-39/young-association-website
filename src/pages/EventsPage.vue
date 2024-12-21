@@ -2,29 +2,40 @@
   <div class="bg-light-background dark:bg-dark-background min-h-screen">
     <Header />
    
+    <!-- Debug Info (remove in production) -->
+    <div class="p-4 bg-yellow-100 text-yellow-800">
+      Events Count: {{ pastEvents.length }}
+      <br>
+      Storage Status: {{ hasLocalStorage ? 'Available' : 'Not Available' }}
+    </div>
+
     <!-- Past Events Section -->
     <section class="p-6 max-w-6xl mx-auto mt-12">
       <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
         {{ $t('eventsPage.pastTitle') }}
       </h2>
-      
+
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-8">
-        <p class="text-gray-600 dark:text-gray-400">Loading events...</p>
+        <p>Loading events...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="text-center text-red-600 py-8">
+        {{ error }}
       </div>
 
       <!-- No Events State -->
-      <div v-else-if="!hasEvents" class="text-center py-8">
-        <p class="text-gray-600 dark:text-gray-400">{{ $t('eventsPage.noEvents') }}</p>
+      <div v-else-if="pastEvents.length === 0" class="text-center text-gray-600 dark:text-gray-400 py-8">
+        {{ $t('eventsPage.noEvents') }}
       </div>
 
       <!-- Events Grid -->
       <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <EventCard 
-          v-for="event in sortedEvents" 
+          v-for="event in pastEvents" 
           :key="event.id" 
-          :event="event"
-          :current-language="currentLanguage" 
+          :event="event" 
         />
       </div>
     </section>
@@ -47,65 +58,93 @@ export default {
   data() {
     return {
       loading: true,
-      events: [],
-      error: null
+      error: null,
+      upcomingEvents: [],
+      pastEvents: [],
+      hasLocalStorage: true
     };
   },
-  computed: {
-    currentLanguage() {
-      return this.$i18n?.locale || localStorage.getItem('language') || 'en';
-    },
-    hasEvents() {
-      return this.events && this.events.length > 0;
-    },
-    sortedEvents() {
-      return [...this.events].sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
-  },
   created() {
-    this.loadEvents();
+    // Check if localStorage is available
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      this.hasLocalStorage = true;
+    } catch (e) {
+      this.hasLocalStorage = false;
+      this.error = 'Local storage is not available';
+      return;
+    }
+
+    this.fetchEvents();
+  },
+  mounted() {
+    // Add event listener for storage changes
+    window.addEventListener('storage', this.handleStorageChange);
+  },
+  beforeDestroy() {
+    window.removeEventListener('storage', this.handleStorageChange);
   },
   methods: {
-    loadEvents() {
+    handleStorageChange(e) {
+      if (e.key === 'events') {
+        this.fetchEvents();
+      }
+    },
+    async fetchEvents() {
       this.loading = true;
-      try {
-        // Get events from localStorage
-        const storedEvents = localStorage.getItem('events');
-        console.log('Stored events:', storedEvents); // Debug log
+      this.error = null;
 
-        if (!storedEvents) {
-          this.events = [];
-          return;
+      try {
+        console.log('Fetching events...');
+        let events = [];
+
+        // Try to get events from localStorage
+        const storedEvents = localStorage.getItem('events');
+        console.log('Raw stored events:', storedEvents);
+
+        if (storedEvents) {
+          events = JSON.parse(storedEvents);
+          
+          // Validate event structure
+          events = events.map(event => {
+            return {
+              id: event.id || Date.now(),
+              date: event.date || new Date().toISOString().slice(0, 10),
+              imageUrl: event.imageUrl || '',
+              en: {
+                title: event?.en?.title || 'No Title',
+                description: event?.en?.description || 'No description available'
+              },
+              ku: {
+                title: event?.ku?.title || 'بێ ناونیشان',
+                description: event?.ku?.description || 'وەسفی بەردەست نییە'
+              }
+            };
+          });
+
+          // Sort by date
+          events.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
 
-        // Parse the events
-        const parsedEvents = JSON.parse(storedEvents);
-        
-        // Validate and transform events
-        this.events = parsedEvents.map(event => ({
-          id: event.id || Date.now(),
-          date: event.date || new Date().toISOString().slice(0, 10),
-          imageUrl: event.imageUrl || '/placeholder-image.jpg',
-          en: {
-            title: event?.en?.title || 'Untitled',
-            description: event?.en?.description || 'No description available'
-          },
-          ku: {
-            title: event?.ku?.title || 'بێ ناونیشان',
-            description: event?.ku?.description || 'هیچ وەسفێک بەردەست نییە'
-          }
-        }));
+        // Split into past and upcoming
+        const today = new Date().toISOString().slice(0, 10);
+        this.pastEvents = events.filter(event => event.date < today);
+        this.upcomingEvents = events.filter(event => event.date >= today);
 
-        console.log('Processed events:', this.events); // Debug log
+        console.log('Past events:', this.pastEvents);
+        console.log('Upcoming events:', this.upcomingEvents);
+
       } catch (error) {
-        console.error('Error loading events:', error);
-        this.error = error.message;
-        this.events = [];
+        console.error('Error fetching events:', error);
+        this.error = 'Error loading events. Please try again.';
+        this.pastEvents = [];
+        this.upcomingEvents = [];
       } finally {
         this.loading = false;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
