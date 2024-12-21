@@ -1,44 +1,46 @@
 <template>
-  <div>
-    <!-- Event Card -->
-    <div class="event-card bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
-      <!-- Image Container -->
+  <div class="event-card bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+    <!-- Card Content -->
+    <div class="relative">
+      <!-- Image with Fallback -->
       <div class="relative h-48">
         <img 
           :src="event.imageUrl" 
-          alt="Event Image" 
+          :alt="getTitle"
           class="w-full h-full object-cover"
           @error="handleImageError" 
         />
-        <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 m-2 rounded-full text-sm">
-          {{ formatDate(event.date) }}
+        <!-- Date Badge -->
+        <div class="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+          {{ formattedDate }}
         </div>
       </div>
 
-      <!-- Content Container -->
+      <!-- Content -->
       <div class="p-6">
         <!-- Title -->
         <h3 
-          class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2" 
-          :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'"
-          :class="{'text-right': currentLanguage === 'ku'}"
+          class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3"
+          :class="{ 'text-right': isKurdish }"
+          :dir="textDirection"
         >
-          {{ currentContent.title }}
+          {{ getTitle }}
         </h3>
 
         <!-- Description -->
-        <div :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'">
+        <div :dir="textDirection">
           <p 
-            class="text-gray-600 dark:text-gray-400" 
-            :class="{'text-right': currentLanguage === 'ku'}"
+            class="text-gray-600 dark:text-gray-400"
+            :class="{ 'text-right': isKurdish }"
           >
             {{ truncatedDescription }}
             <button 
-              v-if="isLongDescription" 
+              v-if="isLongDescription"
               @click="showModal = true"
-              class="text-blue-600 dark:text-blue-400 hover:underline ml-2 font-medium"
+              class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 mt-2"
+              :class="{ 'flex-row-reverse': isKurdish }"
             >
-              {{ currentLanguage === 'en' ? 'Read More' : 'زیاتر بخوێنەوە' }}
+              {{ isKurdish ? 'زیاتر بخوێنەوە' : 'Read More' }}
             </button>
           </p>
         </div>
@@ -46,51 +48,41 @@
     </div>
 
     <!-- Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div 
-        class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-        @click="showModal = false"
-      ></div>
-      
-      <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="relative bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full p-6 shadow-xl">
+    <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="showModal = false">
+      <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl">
+          <!-- Close Button -->
           <button 
             @click="showModal = false"
-            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
-          <div class="mt-2">
+          <!-- Modal Content -->
+          <div class="p-6">
             <img 
               :src="event.imageUrl" 
-              alt="Event Image" 
+              :alt="getTitle"
               class="w-full h-64 object-cover rounded-lg mb-4"
               @error="handleImageError"
             />
-
             <h3 
-              class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2" 
-              :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'"
-              :class="{'text-right': currentLanguage === 'ku'}"
+              class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2"
+              :class="{ 'text-right': isKurdish }"
+              :dir="textDirection"
             >
-              {{ currentContent.title }}
+              {{ getTitle }}
             </h3>
-
-            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ formatDate(event.date) }}</p>
-
+            <p class="text-gray-500 mb-4">{{ formattedDate }}</p>
             <div 
-              class="prose dark:prose-invert max-w-none" 
-              :dir="currentLanguage === 'ku' ? 'rtl' : 'ltr'"
+              class="prose dark:prose-invert max-w-none"
+              :class="{ 'text-right': isKurdish }"
+              :dir="textDirection"
             >
-              <p 
-                class="text-gray-700 dark:text-gray-300" 
-                :class="{'text-right': currentLanguage === 'ku'}"
-              >
-                {{ currentContent.description }}
-              </p>
+              {{ getDescription }}
             </div>
           </div>
         </div>
@@ -105,50 +97,60 @@ export default {
   props: {
     event: {
       type: Object,
-      required: true,
-      validator: (value) => {
-        return value && value.en && value.ku && value.date && value.imageUrl;
-      }
+      required: true
     },
+    currentLanguage: {
+      type: String,
+      default: 'en'
+    }
   },
   data() {
     return {
       showModal: false,
       maxLength: 150,
-      fallbackImage: '/placeholder-event.jpg'
+      fallbackImage: '/placeholder-image.jpg'
     };
   },
   computed: {
-    currentLanguage() {
-      return this.$i18n.locale || localStorage.getItem('language') || 'en';
+    isKurdish() {
+      return this.currentLanguage === 'ku';
     },
-    currentContent() {
-      return this.currentLanguage === 'en' ? this.event.en : this.event.ku;
+    textDirection() {
+      return this.isKurdish ? 'rtl' : 'ltr';
     },
-    isLongDescription() {
-      return this.currentContent.description.length > this.maxLength;
+    getTitle() {
+      return this.isKurdish ? this.event.ku.title : this.event.en.title;
+    },
+    getDescription() {
+      return this.isKurdish ? this.event.ku.description : this.event.en.description;
     },
     truncatedDescription() {
-      if (this.isLongDescription) {
-        return this.currentContent.description.slice(0, this.maxLength) + '...';
+      const description = this.getDescription;
+      return description.length > this.maxLength 
+        ? description.slice(0, this.maxLength) + '...'
+        : description;
+    },
+    isLongDescription() {
+      return this.getDescription.length > this.maxLength;
+    },
+    formattedDate() {
+      try {
+        const date = new Date(this.event.date);
+        return date.toLocaleDateString(this.isKurdish ? 'ku' : 'en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      } catch (error) {
+        console.error('Date formatting error:', error);
+        return this.event.date;
       }
-      return this.currentContent.description;
     }
   },
   methods: {
-    formatDate(date) {
-      try {
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(date).toLocaleDateString(
-          this.currentLanguage === 'en' ? 'en-US' : 'ar-IQ', 
-          options
-        );
-      } catch (error) {
-        return date;
-      }
-    },
     handleImageError(e) {
       e.target.src = this.fallbackImage;
+      console.log('Image load error, using fallback');
     }
   }
 };
@@ -160,15 +162,7 @@ export default {
 }
 
 .event-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.modal-enter-active, .modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from, .modal-leave-to {
-  opacity: 0;
 }
 </style>
