@@ -1,6 +1,5 @@
 <template>
-  <div class="bg-light-background dark:bg-dark-background min-h-screen flex">
-    <Header />
+ 
 
     <!-- Sidebar for Admin Navigation -->
     <aside class="w-1/4 bg-gray-100 dark:bg-gray-800 p-6">
