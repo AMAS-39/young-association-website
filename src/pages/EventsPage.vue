@@ -7,14 +7,24 @@
       <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
         {{ $t('eventsPage.pastTitle') }}
       </h2>
-      <div v-if="!pastEvents.length" class="text-center text-gray-600 dark:text-gray-400 p-8">
-        {{ $t('eventsPage.noEvents') }}
+      
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-8">
+        <p class="text-gray-600 dark:text-gray-400">Loading events...</p>
       </div>
+
+      <!-- No Events State -->
+      <div v-else-if="!hasEvents" class="text-center py-8">
+        <p class="text-gray-600 dark:text-gray-400">{{ $t('eventsPage.noEvents') }}</p>
+      </div>
+
+      <!-- Events Grid -->
       <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <EventCard 
-          v-for="event in sortedPastEvents" 
+          v-for="event in sortedEvents" 
           :key="event.id" 
-          :event="event" 
+          :event="event"
+          :current-language="currentLanguage" 
         />
       </div>
     </section>
@@ -36,78 +46,64 @@ export default {
   },
   data() {
     return {
-      pastEvents: [],
+      loading: true,
+      events: [],
+      error: null
     };
   },
   computed: {
-    sortedPastEvents() {
-      return [...this.pastEvents].sort((a, b) => new Date(b.date) - new Date(a.date));
+    currentLanguage() {
+      return this.$i18n?.locale || localStorage.getItem('language') || 'en';
+    },
+    hasEvents() {
+      return this.events && this.events.length > 0;
+    },
+    sortedEvents() {
+      return [...this.events].sort((a, b) => new Date(b.date) - new Date(a.date));
     }
   },
   created() {
-    this.fetchEvents();
-  },
-  mounted() {
-    // Add event listener for storage changes
-    window.addEventListener('storage', this.fetchEvents);
-  },
-  beforeUnmount() {
-    window.removeEventListener('storage', this.fetchEvents);
+    this.loadEvents();
   },
   methods: {
-    fetchEvents() {
+    loadEvents() {
+      this.loading = true;
       try {
         // Get events from localStorage
         const storedEvents = localStorage.getItem('events');
+        console.log('Stored events:', storedEvents); // Debug log
+
         if (!storedEvents) {
-          this.pastEvents = [];
+          this.events = [];
           return;
         }
 
-        const events = JSON.parse(storedEvents);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Parse the events
+        const parsedEvents = JSON.parse(storedEvents);
+        
+        // Validate and transform events
+        this.events = parsedEvents.map(event => ({
+          id: event.id || Date.now(),
+          date: event.date || new Date().toISOString().slice(0, 10),
+          imageUrl: event.imageUrl || '/placeholder-image.jpg',
+          en: {
+            title: event?.en?.title || 'Untitled',
+            description: event?.en?.description || 'No description available'
+          },
+          ku: {
+            title: event?.ku?.title || 'بێ ناونیشان',
+            description: event?.ku?.description || 'هیچ وەسفێک بەردەست نییە'
+          }
+        }));
 
-        // Filter and validate events
-        this.pastEvents = events
-          .filter(event => {
-            const eventDate = new Date(event.date);
-            eventDate.setHours(0, 0, 0, 0);
-            return eventDate < today && this.isValidEvent(event);
-          })
-          .map(event => this.normalizeEvent(event));
-
+        console.log('Processed events:', this.events); // Debug log
       } catch (error) {
-        console.error('Error fetching events:', error);
-        this.pastEvents = [];
+        console.error('Error loading events:', error);
+        this.error = error.message;
+        this.events = [];
+      } finally {
+        this.loading = false;
       }
-    },
-    isValidEvent(event) {
-      return (
-        event &&
-        event.id &&
-        event.date &&
-        event.imageUrl &&
-        event.en?.title &&
-        event.en?.description &&
-        event.ku?.title &&
-        event.ku?.description
-      );
-    },
-    normalizeEvent(event) {
-      return {
-        id: event.id,
-        date: event.date,
-        imageUrl: event.imageUrl,
-        en: {
-          title: event.en.title,
-          description: event.en.description
-        },
-        ku: {
-          title: event.ku.title,
-          description: event.ku.description
-        }
-      };
     }
   }
 };
