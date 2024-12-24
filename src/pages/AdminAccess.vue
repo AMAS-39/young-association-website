@@ -1,8 +1,7 @@
-```vue
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <div class="flex min-h-screen">
-      <!-- Sidebar -->
+      <!-- Sidebar remains the same -->
       <aside class="w-64 bg-white dark:bg-gray-800 shadow-md">
         <div class="p-6">
           <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6">Admin Dashboard</h2>
@@ -23,6 +22,16 @@
             </button>
           </div>
 
+          <!-- Loading State -->
+          <div v-if="loading" class="text-center py-8">
+            <p class="text-gray-600 dark:text-gray-400">Loading events...</p>
+          </div>
+
+          <!-- Error State -->
+          <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {{ error }}
+          </div>
+
           <!-- Events List -->
           <div class="space-y-4">
             <div v-for="event in events" :key="event.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
@@ -33,7 +42,7 @@
                     <div>
                       <div class="mb-4">
                         <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
-                          {{ (event.en && event.en.title) || 'No title' }}
+                          {{ event.en_title || 'No title' }}
                         </h3>
                         <p class="text-sm text-gray-500">{{ event.date || 'No date' }}</p>
                       </div>
@@ -42,14 +51,14 @@
                         <div>
                           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-1">English</h4>
                           <p class="text-gray-600 dark:text-gray-400">
-                            {{ (event.en && event.en.description) || 'No description' }}
+                            {{ event.en_description || 'No description' }}
                           </p>
                         </div>
                         <!-- Kurdish Content -->
                         <div>
                           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-1">Kurdish</h4>
                           <p class="text-gray-600 dark:text-gray-400 text-right" dir="rtl">
-                            {{ (event.ku && event.ku.description) || 'No description' }}
+                            {{ event.ku_description || 'No description' }}
                           </p>
                         </div>
                       </div>
@@ -137,6 +146,8 @@
 </template>
 
 <script>
+import { supabase } from '@/lib/supabaseClient'
+
 export default {
   name: 'AdminAccess',
   data() {
@@ -144,47 +155,41 @@ export default {
       events: [],
       showEventForm: false,
       isEditingEvent: false,
+      loading: true,
+      error: null,
       eventForm: this.getEmptyEventForm()
     }
   },
-  created() {
+  async created() {
     // Check authentication
     if (!localStorage.getItem('isAuthenticated')) {
       this.$router.push('/login');
       return;
     }
     
-    // Load events
-    try {
-      const savedEvents = localStorage.getItem('events');
-      if (savedEvents) {
-        const parsedEvents = JSON.parse(savedEvents);
-        // Ensure each event has the correct structure
-        this.events = parsedEvents.map(event => ({
-          id: event.id || Date.now(),
-          date: event.date || '',
-          imageUrl: event.imageUrl || '',
-          en: {
-            title: event?.en?.title || '',
-            description: event?.en?.description || ''
-          },
-          ku: {
-            title: event?.ku?.title || '',
-            description: event?.ku?.description || ''
-          }
-        }));
-      } else {
-        this.events = [];
-      }
-    } catch (error) {
-      console.error('Error loading events:', error);
-      this.events = [];
-    }
+    await this.fetchEvents();
   },
   methods: {
+    async fetchEvents() {
+      try {
+        this.loading = true;
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        this.events = data;
+      } catch (error) {
+        console.error('Error loading events:', error);
+        this.error = 'Error loading events. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
     getEmptyEventForm() {
       return {
-        id: Date.now(),
         date: '',
         imageUrl: '',
         en: {
@@ -200,18 +205,17 @@ export default {
     openEventForm(event = null) {
       this.isEditingEvent = !!event;
       if (event) {
-        // Ensure proper structure when editing
         this.eventForm = {
-          id: event.id || Date.now(),
-          date: event.date || '',
-          imageUrl: event.imageUrl || '',
+          id: event.id,
+          date: event.date,
+          imageUrl: event.imageUrl,
           en: {
-            title: event?.en?.title || '',
-            description: event?.en?.description || ''
+            title: event.en_title,
+            description: event.en_description
           },
           ku: {
-            title: event?.ku?.title || '',
-            description: event?.ku?.description || ''
+            title: event.ku_title,
+            description: event.ku_description
           }
         };
       } else {
@@ -219,48 +223,61 @@ export default {
       }
       this.showEventForm = true;
     },
-    saveEvent() {
+    async saveEvent() {
       try {
         const eventData = {
-          id: this.eventForm.id,
           date: this.eventForm.date,
           imageUrl: this.eventForm.imageUrl,
-          en: {
-            title: this.eventForm.en.title,
-            description: this.eventForm.en.description
-          },
-          ku: {
-            title: this.eventForm.ku.title,
-            description: this.eventForm.ku.description
-          }
+          en_title: this.eventForm.en.title,
+          en_description: this.eventForm.en.description,
+          ku_title: this.eventForm.ku.title,
+          ku_description: this.eventForm.ku.description
         };
 
         if (this.isEditingEvent) {
-          const index = this.events.findIndex(e => e.id === this.eventForm.id);
-          if (index !== -1) {
-            this.events.splice(index, 1, eventData);
-          }
+          const { error } = await supabase
+            .from('events')
+            .update(eventData)
+            .eq('id', this.eventForm.id);
+
+          if (error) throw error;
         } else {
-          this.events.push(eventData);
+          const { error } = await supabase
+            .from('events')
+            .insert([eventData]);
+
+          if (error) throw error;
         }
         
-        localStorage.setItem('events', JSON.stringify(this.events));
+        await this.fetchEvents();
         this.closeForm();
       } catch (error) {
         console.error('Error saving event:', error);
-        alert('Error saving event. Please try again.');
+        this.error = 'Error saving event. Please try again.';
       }
     },
-    deleteEvent(id) {
+    async deleteEvent(id) {
       if (confirm('Are you sure you want to delete this event?')) {
-        this.events = this.events.filter(event => event.id !== id);
-        localStorage.setItem('events', JSON.stringify(this.events));
+        try {
+          const { error } = await supabase
+            .from('events')
+            .delete()
+            .eq('id', id);
+
+          if (error) throw error;
+
+          await this.fetchEvents();
+        } catch (error) {
+          console.error('Error deleting event:', error);
+          this.error = 'Error deleting event. Please try again.';
+        }
       }
     },
     closeForm() {
       this.showEventForm = false;
       this.isEditingEvent = false;
       this.eventForm = this.getEmptyEventForm();
+      this.error = null;
     },
     logout() {
       localStorage.removeItem('isAuthenticated');
@@ -271,17 +288,10 @@ export default {
 </script>
 
 <style scoped>
-
 .bg-light-background {
-
   background-color: #f7fafc;
-
 }
-
 .bg-dark-background {
-
   background-color: #1a202c;
-
 }
 </style>
-```
