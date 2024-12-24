@@ -1,3 +1,4 @@
+//EventsPage.vue
 <template>
   <div class="bg-light-background dark:bg-dark-background min-h-screen">
     <Header />
@@ -26,7 +27,7 @@
       <!-- Events Grid -->
       <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <EventCard 
-          v-for="event in pastEvents" 
+          v-for="event in formattedPastEvents" 
           :key="event.id" 
           :event="event" 
         />
@@ -37,9 +38,10 @@
 </template>
 
 <script>
-import Header from '@/components/MainHeader.vue';
-import Footer from '@/components/MainFooter.vue';
-import EventCard from '@/components/EventCard.vue';
+import { supabase } from '@/lib/supabaseClient'
+import Header from '@/components/MainHeader.vue'
+import Footer from '@/components/MainFooter.vue'
+import EventCard from '@/components/EventCard.vue'
 
 export default {
   name: 'EventsPage',
@@ -54,84 +56,73 @@ export default {
       error: null,
       upcomingEvents: [],
       pastEvents: [],
-      hasLocalStorage: true
-    };
+    }
+  },
+  computed: {
+    formattedPastEvents() {
+      return this.pastEvents.map(event => ({
+        id: event.id,
+        date: event.date,
+        imageUrl: event.imageUrl,
+        en: {
+          title: event.en_title || 'No Title',
+          description: event.en_description || 'No description available'
+        },
+        ku: {
+          title: event.ku_title || 'بێ ناونیشان',
+          description: event.ku_description || 'وەسفی بەردەست نییە'
+        }
+      }))
+    },
+    formattedUpcomingEvents() {
+      return this.upcomingEvents.map(event => ({
+        id: event.id,
+        date: event.date,
+        imageUrl: event.imageUrl,
+        en: {
+          title: event.en_title || 'No Title',
+          description: event.en_description || 'No description available'
+        },
+        ku: {
+          title: event.ku_title || 'بێ ناونیشان',
+          description: event.ku_description || 'وەسفی بەردەست نییە'
+        }
+      }))
+    }
   },
   created() {
-    // Check if localStorage is available
-    try {
-      localStorage.setItem('test', 'test');
-      localStorage.removeItem('test');
-      this.hasLocalStorage = true;
-    } catch (e) {
-      this.hasLocalStorage = false;
-      this.error = 'Local storage is not available';
-      return;
-    }
-
-    this.fetchEvents();
-  },
-  mounted() {
-    // Add event listener for storage changes
-    window.addEventListener('storage', this.handleStorageChange);
-  },
-  beforeUnmount() { // Changed from beforeDestroy to beforeUnmount
-    window.removeEventListener('storage', this.handleStorageChange);
+    this.fetchEvents()
   },
   methods: {
-    handleStorageChange(e) {
-      if (e.key === 'events') {
-        this.fetchEvents();
-      }
-    },
     async fetchEvents() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
 
       try {
-        let events = [];
+        // Fetch events from Supabase
+        const { data: events, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('date', { ascending: false })
 
-        // Try to get events from localStorage
-        const storedEvents = localStorage.getItem('events');
-
-        if (storedEvents) {
-          events = JSON.parse(storedEvents);
-          
-          // Validate event structure
-          events = events.map(event => ({
-            id: event.id || Date.now(),
-            date: event.date || new Date().toISOString().slice(0, 10),
-            imageUrl: event.imageUrl || '',
-            en: {
-              title: event?.en?.title || 'No Title',
-              description: event?.en?.description || 'No description available'
-            },
-            ku: {
-              title: event?.ku?.title || 'بێ ناونیشان',
-              description: event?.ku?.description || 'وەسفی بەردەست نییە'
-            }
-          }));
-
-          // Sort by date
-          events.sort((a, b) => new Date(b.date) - new Date(a.date));
-        }
+        if (error) throw error
 
         // Split into past and upcoming
-        const today = new Date().toISOString().slice(0, 10);
-        this.pastEvents = events.filter(event => event.date < today);
-        this.upcomingEvents = events.filter(event => event.date >= today);
+        const today = new Date().toISOString().slice(0, 10)
+        this.pastEvents = events.filter(event => event.date < today)
+        this.upcomingEvents = events.filter(event => event.date >= today)
 
       } catch (error) {
-        console.error('Error fetching events:', error);
-        this.error = 'Error loading events. Please try again.';
-        this.pastEvents = [];
-        this.upcomingEvents = [];
+        console.error('Error fetching events:', error)
+        this.error = 'Error loading events. Please try again.'
+        this.pastEvents = []
+        this.upcomingEvents = []
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
   },
-};
+}
 </script>
 
 <style scoped>
@@ -142,3 +133,4 @@ export default {
   background-color: #1a202c;
 }
 </style>
+
